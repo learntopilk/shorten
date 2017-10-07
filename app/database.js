@@ -7,7 +7,7 @@ var url = "mongodb://"+user+":"+pwd+"@ds157964.mlab.com:57964/jonbase";
 
 var length;
 
-exports.serch = function(string){
+exports.serch = function(string, callback){
   mongo.connect(url, function(err, db){
     if (err) {throw err;}
     var coll = db.collection('urls');
@@ -18,7 +18,8 @@ exports.serch = function(string){
         throw err
       } else {
         console.log("resp: " + resp);
-        return resp;
+        return callback(resp);
+        //return resp;
       }
       
     });
@@ -50,29 +51,29 @@ exports.findRedirect = function(num, callback){
   mongo.connect(url, function(err, db){
     if(err){
       console.log(err);
-      return err;
+      return callback(null);
     }
     console.log("connecting...");
     var coll = db.collection("urls");    
     coll.find({"shortened-value":num}, function(err, data){
-      if (err) {throw err;}
+      if (err) {throw err;return callback(null);}
       var ret = data.toArray();
       return ret;
       
     }).then(function(items){
-      console.log(items[0].url);
-      if (items[0].url) {
-        return callback(items[0].url);
+      //console.log(items[0]);
+      if (items) {
+        return callback(items);
       } else {
         return callback(null);
       }
     });  
     
     db.close();
-    console.log(2);
+    //console.log(2);
     return res;
   });
-  console.log(3);
+  //console.log(3);
   return res;
   //db.close();
 }
@@ -94,19 +95,12 @@ exports.newRedirect = function (string, callback){
         if(err) {throw err;}
         
          callback((parseInt(resp) + 1));
-        //return resp + 1;
         db.close();
       
     });
       
     });
     
-    
-    
-    /*coll.insert({"url":string, "shortened-value": count + 1},function(err, resp){
-      if(err) {throw err;}
-      
-    });*/
   });
 }
 
